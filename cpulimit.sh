@@ -1,25 +1,44 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "Starting cpulimit installation..."
+echo "================================"
+echo "     CPU LIMIT INSTALLER"
+echo "     Powered by SHIVAMBROOG"
+echo "================================"
 
-cd ~
-wget https://github.com/denji/cpulimit/archive/refs/heads/master.zip -O cpulimit.zip
-unzip cpulimit.zip
-cd cpulimit-master
+cd "$HOME"
+
+echo "[1/7] Downloading cpulimit..."
+wget -q https://github.com/denji/cpulimit/archive/refs/heads/master.zip -O cpulimit.zip
+
+echo "[2/7] Extracting files..."
+unzip -oq cpulimit.zip
+
+echo "[3/7] Entering source folder..."
+cd "$HOME/cpulimit-master"
+
+echo "[4/7] Compiling cpulimit..."
 make
-mkdir -p ~/bin
-cp build/cpulimit ~/bin/cpulimit
-chmod +x ~/bin/cpulimit
 
-# Add to PATH if not already present
-if ! grep -q 'HOME/bin' ~/.bashrc; then
-    echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+echo "[5/7] Installing to ~/bin..."
+mkdir -p "$HOME/bin"
+cp build/cpulimit "$HOME/bin/cpulimit"
+chmod +x "$HOME/bin/cpulimit"
+
+echo "[6/7] Updating PATH..."
+touch "$HOME/.bashrc"
+
+if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$HOME/.bashrc"; then
+    echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.bashrc"
 fi
 
 export PATH="$HOME/bin:$PATH"
 
-echo "Installation complete!"
-cpulimit -V
+echo "[7/7] Checking installation..."
+"$HOME/bin/cpulimit" -V
+
+echo "================================"
+echo "     INSTALLATION SUCCESS!"
+echo "     CPU LIMIT READY"
+echo "================================"
