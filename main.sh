@@ -10,7 +10,7 @@ SCRIPTS=(
     "NON ROOT JAVA|https://raw.githubusercontent.com/ytmcnet-byte/scripts/refs/heads/main/non-root-java.sh"
     "OG FORWARD|https://raw.githubusercontent.com/ytmcnet-byte/scripts/refs/heads/main/og-forward.sh"
     "TAILSCALE INSTALLER|https://raw.githubusercontent.com/ytmcnet-byte/scripts/refs/heads/main/tailscale-install.sh"
-    "PWRP INSTALLER|curl -fsSL https://raw.githubusercontent.com/ytmcnet-byte/scripts/refs/heads/main/pwrp.sh | bash
+    "PWRP INSTALLER|curl -fsSL https://raw.githubusercontent.com/ytmcnet-byte/scripts/refs/heads/main/pwrp.sh | bash"
 )
 
 while true; do
