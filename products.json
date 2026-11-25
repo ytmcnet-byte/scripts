@@ -1,0 +1,44 @@
+[
+  {
+    "category": "Intel Xeon Server",
+    "plans": [
+      {
+        "name": "Xeon 4GB",
+        "ram": "4 GB",
+        "cpu": "150%",
+        "storage": "5 GB SSD",
+        "price": 49,
+        "file": "products/intel-plan1.html"
+      },
+      {
+        "name": "Xeon 6GB",
+        "ram": "6 GB",
+        "cpu": "250%",
+        "storage": "10 GB SSD",
+        "price": 99,
+        "file": "products/intel-plan2.html"
+      }
+    ]
+  },
+  {
+    "category": "ARM Server",
+    "plans": [
+      {
+        "name": "ARM 5GB",
+        "ram": "5 GB",
+        "cpu": "100%",
+        "storage": "10 GB SSD",
+        "price": 29,
+        "file": "products/arm-5gb.html"
+      },
+      {
+        "name": "ARM 10GB",
+        "ram": "10 GB",
+        "cpu": "200%",
+        "storage": "25 GB SSD",
+        "price": 69,
+        "file": "products/arm-10gb.html"
+      }
+    ]
+  }
+]
