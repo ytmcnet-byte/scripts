@@ -1,393 +1,217 @@
 #!/usr/bin/env python3
+
 import os
 import re
-import sys
 import time
-import json
-import queue
-import socket
 import threading
 import subprocess
-import urllib.request
-import urllib.parse
-from pathlib import Path
+import requests
+import pexpect
 
-# =====================================
-# OGHOST MULTI-VPS PINGGY MANAGER
-# =====================================
+# ============ CONFIGURATION ============
 
-NODE_ID = os.environ["NODE_ID"]
-CF_TOKEN = os.environ["CF_API_TOKEN"]
-ZONE_ID = os.environ["CF_ZONE_ID"]
+NODE_ID = os.getenv("NODE_ID", "n001")
+CF_API_TOKEN = os.getenv("CF_API_TOKEN", "")
+CF_ZONE_ID = os.getenv("CF_ZONE_ID", "")
 
-DOMAIN = "in-2g.oghost.qzz.io"
+DOMAIN = f"{NODE_ID}.in-2g.oghost.qzz.io"
+SRV_NAME = f"_oghost._tcp.{DOMAIN}"
+
 LOCAL_PORT = 8787
+ROTATE_SECONDS = 3000
+HEARTBEAT_SECONDS = 15
 
 PINGGY_HOST = "ap.free.pinggy.io"
-PINGGY_USER = "tcp"
 
-ROTATION = 50 * 60
-HEARTBEAT = 15
-DRAIN_SECONDS = 30
-START_TIMEOUT = 90
+API = f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/dns_records"
 
-CF_API = "https://api.cloudflare.com/client/v4"
-BASE = Path.home() / ".oghost-tunnel" / NODE_ID
-BASE.mkdir(parents=True, exist_ok=True)
+HEADERS = {
+    "Authorization": f"Bearer {CF_API_TOKEN}",
+    "Content-Type": "application/json"
+}
 
-if not re.fullmatch(r"[a-zA-Z0-9-]{1,30}", NODE_ID):
-    raise ValueError("Invalid NODE_ID")
+# =======================================
 
-CNAME = f"{NODE_ID}.{DOMAIN}"
-SRV = f"_oghost._tcp.{CNAME}"
+if not CF_API_TOKEN or not CF_ZONE_ID:
+    raise SystemExit("ERROR: CF_API_TOKEN aur CF_ZONE_ID set karo.")
 
-
-def log(message):
-    print(time.strftime("[%Y-%m-%d %H:%M:%S]"),
-          f"[{NODE_ID}] {message}", flush=True)
-
-
-# =====================================
-# CLOUDFLARE
-# =====================================
-
-def cf(method, path, data=None):
-    body = json.dumps(data).encode() if data is not None else None
-
-    req = urllib.request.Request(
-        CF_API + path,
-        data=body,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {CF_TOKEN}",
-            "Content-Type": "application/json"
-        }
+def cf_request(method, url, **kwargs):
+    response = requests.request(
+        method, url, headers=HEADERS,
+        timeout=20, **kwargs
     )
+    response.raise_for_status()
+    data = response.json()
 
-    with urllib.request.urlopen(req, timeout=20) as response:
-        result = json.loads(response.read())
+    if not data.get("success"):
+        raise RuntimeError(str(data.get("errors")))
 
-    if not result.get("success"):
-        raise RuntimeError(str(result.get("errors")))
+    return data
 
-    return result.get("result", [])
+def find_record(name, record_type):
+    result = cf_request(
+        "GET", API,
+        params={"name": name, "type": record_type}
+    )
+    return result["result"][0] if result["result"] else None
 
+def update_record(record_type, name, content, **extra):
+    record = find_record(name, record_type)
 
-def record(record_type, name):
-    query = urllib.parse.urlencode({
+    payload = {
         "type": record_type,
-        "name": name
-    })
-
-    records = cf(
-        "GET",
-        f"/zones/{ZONE_ID}/dns_records?{query}"
-    )
-
-    return records[0] if records else None
-
-
-def upsert(record_type, name, payload):
-    path = f"/zones/{ZONE_ID}/dns_records"
-    old = record(record_type, name)
-
-    if old:
-        cf("PATCH", path + "/" + old["id"], payload)
-    else:
-        cf("POST", path, payload)
-
-
-def snapshot_dns():
-    return {
-        "cname": record("CNAME", CNAME),
-        "srv": record("SRV", SRV)
+        "name": name,
+        "content": content,
+        "ttl": 60,
+        **extra
     }
 
+    if record:
+        return cf_request(
+            "PUT", f"{API}/{record['id']}",
+            json=payload
+        )["result"]
 
-def restore_one(record_type, name, old):
-    path = f"/zones/{ZONE_ID}/dns_records"
-    current = record(record_type, name)
-
-    if old:
-        payload = {
-            "type": record_type,
-            "name": name,
-            "ttl": old["ttl"]
-        }
-
-        if record_type == "CNAME":
-            payload.update({
-                "content": old["content"],
-                "proxied": old.get("proxied", False)
-            })
-        else:
-            payload["data"] = old["data"]
-
-        cf("PATCH", path + "/" + old["id"], payload)
-
-    elif current:
-        cf("DELETE", path + "/" + current["id"])
-
+    return cf_request("POST", API, json=payload)["result"]
 
 def update_dns(host, port):
-    upsert("CNAME", CNAME, {
-        "type": "CNAME",
-        "name": CNAME,
-        "content": host,
-        "ttl": 1,
-        "proxied": False
-    })
+    update_record("CNAME", DOMAIN, host)
 
-    upsert("SRV", SRV, {
-        "type": "SRV",
-        "name": SRV,
-        "ttl": 1,
-        "data": {
-            "priority": 0,
-            "weight": 0,
+    update_record(
+        "SRV",
+        SRV_NAME,
+        f"1 1 {port} {host}",
+        data={
+            "service": "_oghost",
+            "proto": "_tcp",
+            "name": DOMAIN,
+            "priority": 1,
+            "weight": 1,
             "port": int(port),
             "target": host
         }
-    })
+    )
 
-    c = record("CNAME", CNAME)
-    s = record("SRV", SRV)
-
-    if not c or c["content"] != host:
-        raise RuntimeError("CNAME verification failed")
-
-    if not s:
-        raise RuntimeError("SRV verification failed")
-
-    data = s["data"]
-
-    if data["target"] != host or int(data["port"]) != int(port):
-        raise RuntimeError("SRV verification failed")
-
-    log(f"DNS VERIFIED: {host}:{port}")
-
-
-# =====================================
-# LOCAL NODE HEALTH
-# =====================================
-
-def local_health():
-    try:
-        with socket.create_connection(
-            ("127.0.0.1", LOCAL_PORT), timeout=3
-        ):
-            return True
-    except OSError:
-        return False
-
-
-# =====================================
-# PINGGY TUNNEL
-# =====================================
+    print(f"[DNS] Updated: {DOMAIN} -> {host}:{port}")
 
 def start_tunnel():
-    log("Starting new Pinggy tunnel")
+    command = (
+        f"ssh -tt -p 443 "
+        f"-o StrictHostKeyChecking=no "
+        f"-o ServerAliveInterval=30 "
+        f"-o ServerAliveCountMax=3 "
+        f"-o ExitOnForwardFailure=yes "
+        f"-R0:localhost:{LOCAL_PORT} "
+        f"tcp@{PINGGY_HOST}"
+    )
 
-    command = [
-        "ssh",
-        "-p", "443",
-        "-o", "StrictHostKeyChecking=no",
-        "-o", "ServerAliveInterval=30",
-        "-o", "ServerAliveCountMax=3",
-        "-o", "ExitOnForwardFailure=yes",
-        "-R0:localhost:8787",
-        f"{PINGGY_USER}@{PINGGY_HOST}"
-    ]
+    print("[PINGGY] Connecting...")
 
-    proc = subprocess.Popen(
+    child = pexpect.spawn(
         command,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1
+        encoding="utf-8",
+        timeout=30
     )
 
-    lines = queue.Queue()
-
-    def reader():
-        try:
-            for line in proc.stdout:
-                lines.put(line)
-        finally:
-            lines.put(None)
-
-    threading.Thread(target=reader, daemon=True).start()
-
-    deadline = time.time() + START_TIMEOUT
-    endpoint = None
-
-    pattern = re.compile(
-        r"tcp://([a-zA-Z0-9.-]+):(\d+)"
-    )
-
-    while time.time() < deadline:
-        if proc.poll() is not None:
-            break
-
-        try:
-            line = lines.get(timeout=1)
-        except queue.Empty:
-            continue
-
-        if line is None:
-            break
-
-        line = line.strip()
-        if line:
-            log("SSH: " + line[:250])
-
-        match = pattern.search(line)
-
-        if match:
-            endpoint = (match.group(1), int(match.group(2)))
-            break
-
-    if not endpoint:
-        proc.terminate()
-        try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-
-        raise RuntimeError(
-            "Pinggy TCP address not detected. "
-            "Check Pinggy SSH output."
-        )
-
-    host, port = endpoint
-
-    if proc.poll() is not None:
-        raise RuntimeError("Tunnel closed during startup")
-
-    log(f"NEW TUNNEL: {host}:{port}")
-
-    return {
-        "process": proc,
-        "host": host,
-        "port": port
-    }
-
-
-def stop_tunnel(tunnel):
-    if not tunnel:
-        return
-
-    proc = tunnel["process"]
-
-    if proc.poll() is None:
-        proc.terminate()
-
-        try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-
-    log("Tunnel stopped")
-
-
-# =====================================
-# MANAGER
-# =====================================
-
-def main():
-    active = None
-    next_rotation = 0
-
-    log("OGHOST TUNNEL MANAGER STARTED")
-    log(f"CNAME: {CNAME}")
-    log(f"SRV: {SRV}")
+    host = None
+    port = None
+    last_enter = 0
 
     while True:
         try:
-            if not local_health():
-                log("WARNING: Local port 8787 unavailable")
-                time.sleep(HEARTBEAT)
-                continue
+            index = child.expect(
+                [
+                    r"(?i)password:",
+                    r"(?i)press\s+enter",
+                    r"(?i)hit\s+enter",
+                    r"tcp://([a-zA-Z0-9.-]+):([0-9]+)",
+                    pexpect.TIMEOUT,
+                    pexpect.EOF
+                ],
+                timeout=10
+            )
 
-            if (
-                active
-                and active["process"].poll() is None
-                and time.time() < next_rotation
-            ):
-                time.sleep(HEARTBEAT)
-                log("HEARTBEAT: Node port healthy")
-                continue
+            if index == 0:
+                # Empty password: send Enter without typing anything
+                child.sendline("")
+                last_enter = time.time()
 
-            old = active
+            elif index in (1, 2):
+                child.sendline("")
+                last_enter = time.time()
 
-            log("Preparing candidate tunnel...")
+            elif index == 3:
+                host = child.match.group(1)
+                port = int(child.match.group(2))
+                print(f"[PINGGY] Public endpoint: {host}:{port}")
+                return child, host, port
 
-            candidate = start_tunnel()
-            previous_dns = snapshot_dns()
+            elif index == 4:
+                if not child.isalive():
+                    break
 
-            try:
-                update_dns(
-                    candidate["host"],
-                    candidate["port"]
-                )
+            elif index == 5:
+                break
 
-            except Exception:
-                log("DNS update failed; rolling back")
-
-                try:
-                    restore_one("CNAME", CNAME, previous_dns["cname"])
-                    restore_one("SRV", SRV, previous_dns["srv"])
-                except Exception as e:
-                    log(f"ROLLBACK ERROR: {e}")
-
-                stop_tunnel(candidate)
-                raise
-
-            # New tunnel activated
-            active = candidate
-            next_rotation = time.time() + ROTATION
-
-            log("NEW TUNNEL ACTIVE")
-
-            # Give DNS caches time to refresh
-            if old:
-                log(f"Old tunnel draining for {DRAIN_SECONDS}s")
-
-                end = time.time() + DRAIN_SECONDS
-
-                while time.time() < end:
-                    if active["process"].poll() is not None:
-                        log("New tunnel failed during drain")
-                        break
-
-                    time.sleep(HEARTBEAT)
-
-                if active["process"].poll() is None:
-                    stop_tunnel(old)
-                else:
-                    # Restore previous DNS and retain old if alive
-                    try:
-                        restore_dns(old["host"], old["port"])
-                    except Exception as e:
-                        log(f"DNS rollback error: {e}")
-
-                    stop_tunnel(active)
-                    active = old
-                    next_rotation = time.time() + HEARTBEAT
-
-            log("Tunnel manager cycle completed")
-
-        except KeyboardInterrupt:
-            log("Stopping manager")
-            stop_tunnel(active)
+        except Exception as error:
+            print("[PINGGY ERROR]", error)
             break
 
-        except Exception as e:
-            log(f"ERROR: {e}")
-            log("Retrying in 15 seconds")
-            time.sleep(HEARTBEAT)
+    print("[PINGGY] Tunnel did not start.")
+    try:
+        print(child.before)
+    except Exception:
+        pass
 
+    child.close(force=True)
+    return None, None, None
+
+def heartbeat():
+    while True:
+        print(f"[HEARTBEAT] {NODE_ID} alive")
+        time.sleep(HEARTBEAT_SECONDS)
+
+def main():
+    threading.Thread(
+        target=heartbeat,
+        daemon=True
+    ).start()
+
+    while True:
+        child = None
+
+        try:
+            child, host, port = start_tunnel()
+
+            if not child:
+                time.sleep(5)
+                continue
+
+            update_dns(host, port)
+
+            print("[OGHOST] Tunnel active.")
+
+            started = time.time()
+
+            while child.isalive():
+                if time.time() - started >= ROTATE_SECONDS:
+                    print("[ROTATION] Starting new tunnel...")
+                    break
+
+                time.sleep(2)
+
+        except KeyboardInterrupt:
+            print("\n[OGHOST] Stopping...")
+            break
+
+        except Exception as error:
+            print("[ERROR]", error)
+
+        finally:
+            if child:
+                child.close(force=True)
+
+        time.sleep(3)
 
 if __name__ == "__main__":
     main()
