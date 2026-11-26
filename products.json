@@ -1,3 +1,4 @@
+
 [
   {
     "category": "Intel Xeon Server",
@@ -18,7 +19,7 @@
         "price": 89,
         "file": "products/2.html"
       },
-     {
+      {
         "name": "Xeon 6GB",
         "ram": "6 GB",
         "cpu": "200%",
@@ -26,7 +27,7 @@
         "price": 119,
         "file": "products/3.html"
       },
-     {
+      {
         "name": "Xeon 10GB",
         "ram": "10 GB",
         "cpu": "400%",
@@ -42,7 +43,7 @@
       {
         "name": "ARM 5GB",
         "ram": "5 GB",
-        "cpu": "100% ",
+        "cpu": "100%",
         "storage": "10 GB SSD",
         "price": 29,
         "file": "products/arm-5gb.html"
