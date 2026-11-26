@@ -2,170 +2,520 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OGHOST - Hosting Billing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b090a">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>OGHOST | Premium Hosting Solutions</title>
 <link rel="icon" href="assets/favicon.ico">
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+ --bg:#0b090a;
+ --panel:#151113;
+ --panel2:#1b1518;
+ --red:#ed263d;
+ --red2:#a80e25;
+ --white:#f7f4f5;
+ --muted:#a49a9e;
+ --border:rgba(255,255,255,.08);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
 
+html{scroll-behavior:smooth}
+
 body{
- font-family:Arial,sans-serif;
- background:#f4f6fb;
- color:#172033;
+ background:var(--bg);
+ color:var(--white);
+ font-family:Inter,Arial,sans-serif;
+ overflow-x:hidden;
 }
+
+a{text-decoration:none;color:inherit}
 
 header{
- background:white;
- padding:18px 7%;
+ height:76px;
+ position:sticky;
+ top:0;
+ z-index:100;
+ background:rgba(11,9,10,.92);
+ backdrop-filter:blur(18px);
+ border-bottom:1px solid var(--border);
+}
+
+.nav{
+ max-width:1200px;
+ height:100%;
+ margin:auto;
+ padding:0 24px;
  display:flex;
+ align-items:center;
  justify-content:space-between;
- align-items:center;
- border-bottom:1px solid #e5e7eb;
 }
 
-.logo{font-size:27px;font-weight:900;color:#e53945}
-.logo span{color:#2364df}
-
-nav a{
- text-decoration:none;
- color:#333;
- margin-left:22px;
- font-size:14px;
+.logo{
+ font-size:27px;
+ font-weight:900;
+ letter-spacing:-1.5px;
 }
 
-.hero{
- padding:75px 8%;
- background:linear-gradient(120deg,#142b55,#2465df);
- color:white;
-}
+.logo span{color:var(--red)}
 
-.hero h1{font-size:42px;margin-bottom:15px}
-.hero p{margin-bottom:25px;opacity:.9}
-
-.hero button{
- background:white;
- color:#e53945;
- border:0;
- padding:13px 22px;
- border-radius:7px;
- font-weight:bold;
- cursor:pointer;
-}
-
-.container{padding:50px 8%}
-
-.heading{text-align:center;margin-bottom:40px}
-.heading h2{font-size:30px;margin-bottom:10px}
-
-.category{margin-bottom:45px}
-
-.category-title{
+.nav-links{
  display:flex;
  align-items:center;
- gap:12px;
- margin-bottom:20px;
+ gap:32px;
 }
 
-.category-title:before{
- content:"";
- width:5px;
- height:27px;
- background:#e53945;
- border-radius:5px;
-}
-
-.category-title h2{font-size:24px}
-
-.products{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
- gap:20px;
-}
-
-.product{
- background:white;
- border:1px solid #e5e7eb;
- border-radius:12px;
- padding:24px;
- box-shadow:0 5px 20px #00000008;
+.nav-links a{
+ color:#c2b9bd;
+ font-size:13px;
+ font-weight:600;
  transition:.2s;
 }
 
-.product:hover{
- transform:translateY(-4px);
- box-shadow:0 10px 25px #00000012;
+.nav-links a:hover{color:white}
+
+.nav-btn{
+ background:var(--red);
+ padding:12px 19px;
+ border-radius:7px;
+ color:white!important;
 }
 
-.product h3{font-size:21px;margin-bottom:15px}
+.hero{
+ position:relative;
+ overflow:hidden;
+ padding:110px 24px 100px;
+ background:
+ radial-gradient(ellipse at 80% 30%,rgba(237,38,61,.20),transparent 45%),
+ radial-gradient(ellipse at 10% 90%,rgba(168,14,37,.12),transparent 40%),
+ #0b090a;
+}
 
-.specs{
- color:#687386;
- line-height:2;
+.hero:before{
+ content:"";
+ position:absolute;
+ inset:0;
+ opacity:.13;
+ background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+ background-size:45px 45px;
+ mask-image:linear-gradient(to bottom,black,transparent);
+ pointer-events:none;
+}
+
+.hero-inner{
+ position:relative;
+ max-width:1100px;
+ margin:auto;
+}
+
+.eyebrow{
+ display:inline-flex;
+ align-items:center;
+ gap:9px;
+ padding:9px 14px;
+ background:rgba(237,38,61,.09);
+ border:1px solid rgba(237,38,61,.25);
+ border-radius:30px;
+ color:#ff7181;
+ font-size:11px;
+ font-weight:800;
+ letter-spacing:1.4px;
+ text-transform:uppercase;
+}
+
+.dot{
+ width:7px;
+ height:7px;
+ background:#ff4058;
+ border-radius:50%;
+ box-shadow:0 0 12px #ff4058;
+}
+
+.hero h1{
+ max-width:760px;
+ font-size:clamp(42px,7vw,76px);
+ line-height:1.08;
+ letter-spacing:-3px;
+ margin:28px 0 22px;
+ font-weight:900;
+}
+
+.hero h1 span{
+ color:var(--red);
+}
+
+.hero p{
+ max-width:570px;
+ color:var(--muted);
+ line-height:1.9;
+ font-size:15px;
+}
+
+.hero-actions{
+ display:flex;
+ flex-wrap:wrap;
+ gap:13px;
+ margin-top:32px;
+}
+
+.btn{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ padding:15px 23px;
+ border-radius:7px;
+ font-size:13px;
+ font-weight:800;
+ transition:.2s;
+ cursor:pointer;
+ border:1px solid transparent;
+}
+
+.btn-primary{
+ background:linear-gradient(135deg,#fa334b,#b90d29);
+ color:white;
+ box-shadow:0 8px 28px rgba(237,38,61,.22);
+}
+
+.btn-primary:hover{
+ transform:translateY(-3px);
+ box-shadow:0 12px 35px rgba(237,38,61,.35);
+}
+
+.btn-secondary{
+ border-color:var(--border);
+ background:rgba(255,255,255,.035);
+ color:white;
+}
+
+.btn-secondary:hover{background:rgba(255,255,255,.09)}
+
+.stats{
+ max-width:1100px;
+ margin:0 auto;
+ padding:0 24px 55px;
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:15px;
+}
+
+.stat{
+ padding:23px;
+ background:var(--panel);
+ border:1px solid var(--border);
+ border-radius:10px;
+}
+
+.stat strong{
+ display:block;
+ font-size:23px;
+ color:white;
+ margin-bottom:7px;
+}
+
+.stat span{
+ color:var(--muted);
+ font-size:11px;
+ font-weight:600;
+ letter-spacing:.5px;
+}
+
+.section{
+ max-width:1200px;
+ margin:auto;
+ padding:75px 24px;
+}
+
+.section-heading{
+ margin-bottom:38px;
+}
+
+.section-label{
+ color:var(--red);
+ font-size:11px;
+ font-weight:800;
+ letter-spacing:2px;
+ text-transform:uppercase;
+ margin-bottom:13px;
+}
+
+.section-heading h2{
+ font-size:clamp(28px,4vw,40px);
+ font-weight:900;
+ letter-spacing:-1.5px;
+ margin-bottom:12px;
+}
+
+.section-heading p{
+ color:var(--muted);
  font-size:14px;
- margin-bottom:18px;
+ line-height:1.7;
 }
+
+.category{
+ margin-bottom:55px;
+}
+
+.category-header{
+ display:flex;
+ align-items:center;
+ gap:13px;
+ margin-bottom:22px;
+}
+
+.category-icon{
+ width:39px;
+ height:39px;
+ border-radius:9px;
+ background:rgba(237,38,61,.12);
+ border:1px solid rgba(237,38,61,.22);
+ display:grid;
+ place-items:center;
+ color:#ff5268;
+ font-size:18px;
+}
+
+.category-header h3{
+ font-size:20px;
+ font-weight:800;
+}
+
+.category-header small{
+ display:block;
+ color:var(--muted);
+ font-size:11px;
+ margin-top:5px;
+ font-weight:500;
+}
+
+.products{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(235px,1fr));
+ gap:17px;
+}
+
+.product{
+ position:relative;
+ background:linear-gradient(150deg,#1a1417,#110e10);
+ border:1px solid var(--border);
+ border-radius:12px;
+ padding:25px;
+ overflow:hidden;
+ transition:.25s;
+}
+
+.product:before{
+ content:"";
+ position:absolute;
+ top:0;
+ left:0;
+ width:100%;
+ height:2px;
+ background:linear-gradient(90deg,transparent,var(--red),transparent);
+ opacity:.6;
+}
+
+.product:hover{
+ transform:translateY(-5px);
+ border-color:rgba(237,38,61,.45);
+ box-shadow:0 15px 35px rgba(0,0,0,.3);
+}
+
+.product-top{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:22px;
+}
+
+.plan-badge{
+ background:rgba(237,38,61,.12);
+ color:#ff7586;
+ padding:7px 10px;
+ border-radius:5px;
+ font-size:10px;
+ font-weight:800;
+ letter-spacing:.7px;
+}
+
+.plan-icon{
+ width:35px;
+ height:35px;
+ border-radius:8px;
+ display:grid;
+ place-items:center;
+ background:#25171c;
+ color:#ff596e;
+ font-size:17px;
+}
+
+.product h4{
+ font-size:20px;
+ font-weight:800;
+ margin-bottom:10px;
+}
+
+.product-specs{
+ border-top:1px solid var(--border);
+ border-bottom:1px solid var(--border);
+ padding:15px 0;
+ margin:17px 0;
+ display:grid;
+ gap:12px;
+}
+
+.spec{
+ display:flex;
+ justify-content:space-between;
+ gap:10px;
+ font-size:12px;
+}
+
+.spec span:first-child{color:var(--muted)}
+.spec span:last-child{font-weight:700;color:#eee}
 
 .price{
- color:#2364df;
- font-size:28px;
- font-weight:bold;
- margin-bottom:18px;
+ font-size:29px;
+ font-weight:900;
+ letter-spacing:-1px;
+ margin:19px 0;
 }
 
 .price small{
- font-size:13px;
- color:#687386;
- font-weight:normal;
+ font-size:11px;
+ font-weight:500;
+ color:var(--muted);
+ letter-spacing:0;
 }
 
-.product a{
+.order-link{
  display:block;
  text-align:center;
- text-decoration:none;
- background:#e53945;
- color:white;
- padding:12px;
+ padding:13px;
  border-radius:7px;
- font-weight:bold;
+ background:linear-gradient(135deg,#ed263d,#a80e25);
+ color:white;
+ font-size:12px;
+ font-weight:800;
+ transition:.2s;
 }
 
-.product a:hover{background:#c92735}
+.order-link:hover{
+ box-shadow:0 7px 20px rgba(237,38,61,.3);
+ filter:brightness(1.12);
+}
 
-.status{
- text-align:center;
+.empty,.error,.loading{
  padding:25px;
- color:#687386;
+ text-align:center;
+ border:1px solid var(--border);
+ border-radius:10px;
+ background:var(--panel);
+ color:var(--muted);
+ font-size:13px;
+ line-height:1.7;
 }
 
-.error{
- background:#fff0f0;
- border:1px solid #ffcaca;
- color:#b42318;
- padding:18px;
- border-radius:9px;
- line-height:1.6;
- overflow-wrap:anywhere;
+.error{color:#ff7888;border-color:#7c2634}
+
+.features{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+ gap:17px;
+}
+
+.feature{
+ padding:24px;
+ background:var(--panel);
+ border:1px solid var(--border);
+ border-radius:10px;
+}
+
+.feature-icon{
+ font-size:23px;
+ margin-bottom:17px;
+}
+
+.feature h3{
+ font-size:15px;
+ margin-bottom:9px;
+}
+
+.feature p{
+ font-size:12px;
+ line-height:1.8;
+ color:var(--muted);
+}
+
+.cta{
+ margin:20px 24px 80px;
+ padding:55px 25px;
+ text-align:center;
+ border:1px solid rgba(237,38,61,.22);
+ border-radius:15px;
+ background:radial-gradient(ellipse at center,rgba(237,38,61,.16),transparent 70%),#151012;
+}
+
+.cta h2{
+ font-size:30px;
+ margin-bottom:13px;
+}
+
+.cta p{
+ color:var(--muted);
+ font-size:13px;
+ margin-bottom:25px;
 }
 
 footer{
- text-align:center;
- padding:30px;
- background:#101d35;
- color:#cbd5e1;
- font-size:13px;
+ border-top:1px solid var(--border);
+ padding:35px 24px;
+ background:#080708;
 }
 
-footer p{margin:7px}
+.footer-inner{
+ max-width:1200px;
+ margin:auto;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:20px;
+ flex-wrap:wrap;
+}
 
-@media(max-width:600px){
- header{padding:15px 5%}
- nav a{margin-left:10px;font-size:12px}
- .logo{font-size:23px}
- .hero{padding:55px 6%}
- .hero h1{font-size:32px}
- .container{padding:35px 6%}
- .category-title h2{font-size:21px}
+.footer-inner p{
+ color:var(--muted);
+ font-size:11px;
+ line-height:1.8;
+}
+
+.footer-brand{
+ font-size:21px;
+ font-weight:900;
+}
+
+.footer-brand span{color:var(--red)}
+
+@media(max-width:650px){
+ .nav{padding:0 17px}
+ .nav-links{gap:13px}
+ .nav-links a{font-size:11px}
+ .nav-btn{padding:10px}
+ .hero{padding:75px 20px}
+ .hero h1{letter-spacing:-2px}
+ .stats{padding:0 17px 35px;gap:9px}
+ .stat{padding:15px 10px}
+ .stat strong{font-size:17px}
+ .stat span{font-size:9px}
+ .section{padding:55px 18px}
+ .products{grid-template-columns:1fr}
+ .cta{margin:10px 17px 55px}
+ .cta h2{font-size:24px}
 }
 </style>
 </head>
@@ -173,106 +523,185 @@ footer p{margin:7px}
 <body>
 
 <header>
- <div class="logo">OG<span>HOST</span></div>
- <nav>
-  <a href="#home">Home</a>
-  <a href="#products">Plans</a>
-  <a href="#contact">Contact</a>
- </nav>
+ <div class="nav">
+  <a class="logo" href="#home">OG<span>HOST</span></a>
+
+  <nav class="nav-links">
+   <a href="#home">Home</a>
+   <a href="#products">Hosting</a>
+   <a href="#features">Features</a>
+   <a href="#contact" class="nav-btn">Contact Us</a>
+  </nav>
+ </div>
 </header>
 
+<main>
+
 <section class="hero" id="home">
- <h1>Welcome to OGHOST</h1>
- <p>Powerful hosting. Reliable performance. Affordable pricing.</p>
- <button onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">
-  Explore Hosting Plans
- </button>
+ <div class="hero-inner">
+
+  <div class="eyebrow">
+   <span class="dot"></span>
+   PREMIUM HOSTING SOLUTIONS
+  </div>
+
+  <h1>
+   Power Your Projects.<br>
+   <span>Without Limits.</span>
+  </h1>
+
+  <p>
+   Discover reliable, high-performance hosting solutions
+   designed for developers, businesses and creators.
+   Get the resources you need at a price you'll love.
+  </p>
+
+  <div class="hero-actions">
+   <a href="#products" class="btn btn-primary">Explore Hosting →</a>
+   <a href="#features" class="btn btn-secondary">Why OGHOST?</a>
+  </div>
+
+ </div>
 </section>
 
-<section class="container" id="products">
- <div class="heading">
-  <h2>Our Hosting Products</h2>
-  <p>Choose your preferred server and hosting plan.</p>
+<div class="stats">
+ <div class="stat">
+  <strong>24/7</strong>
+  <span>HOSTING ACCESS</span>
+ </div>
+ <div class="stat">
+  <strong>High Performance</strong>
+  <span>SERVER RESOURCES</span>
+ </div>
+ <div class="stat">
+  <strong>Reliable</strong>
+  <span>HOSTING EXPERIENCE</span>
+ </div>
+</div>
+
+<section class="section" id="products">
+
+ <div class="section-heading">
+  <div class="section-label">OUR SERVICES</div>
+  <h2>Choose Your Hosting</h2>
+  <p>Explore our available server categories and find the right plan for your project.</p>
  </div>
 
- <div id="productList" class="status">
-  Loading hosting plans...
+ <div id="productList" class="loading">
+  Loading available hosting plans...
  </div>
+
 </section>
 
-<footer id="contact">
- <p>© 2026 OGHOST. All rights reserved.</p>
- <p>Powered by SHIVAMBROOG</p>
+<section class="section" id="features">
+
+ <div class="section-heading">
+  <div class="section-label">WHY OGHOST</div>
+  <h2>Built For Performance</h2>
+  <p>Everything you need to power your online projects.</p>
+ </div>
+
+ <div class="features">
+  <div class="feature">
+   <div class="feature-icon">⚡</div>
+   <h3>High Performance</h3>
+   <p>Hosting resources designed to deliver a smooth and responsive experience.</p>
+  </div>
+
+  <div class="feature">
+   <div class="feature-icon">🛡️</div>
+   <h3>Reliable Infrastructure</h3>
+   <p>Dependable hosting infrastructure for your applications and projects.</p>
+  </div>
+
+  <div class="feature">
+   <div class="feature-icon">💬</div>
+   <h3>Community Support</h3>
+   <p>Get assistance and connect with the OGHOST team.</p>
+  </div>
+
+  <div class="feature">
+   <div class="feature-icon">💰</div>
+   <h3>Affordable Plans</h3>
+   <p>Choose a hosting package that matches your requirements and budget.</p>
+  </div>
+ </div>
+
+</section>
+
+<section class="cta" id="contact">
+ <h2>Ready to Get Started?</h2>
+ <p>Choose your hosting plan and get in touch with our team.</p>
+ <a href="#products" class="btn btn-primary">View Hosting Plans →</a>
+</section>
+
+</main>
+
+<footer>
+ <div class="footer-inner">
+  <div>
+   <div class="footer-brand">OG<span>HOST</span></div>
+   <p>Premium Hosting Solutions</p>
+  </div>
+  <p>© 2026 OGHOST. All rights reserved.<br>Powered by SHIVAMBROOG</p>
+ </div>
 </footer>
 
 <script>
-const PRODUCT_FILE = "./products.json";
+const PRODUCT_FILE="./products.json";
 
-function safeText(value){
+function textValue(value){
  return String(value ?? "");
 }
 
 function escapeHTML(value){
- return safeText(value).replace(/[&<>"']/g,c=>({
-  "&":"&amp;",
-  "<":"&lt;",
-  ">":"&gt;",
-  '"':"&quot;",
-  "'":"&#39;"
-}[c]));
+ return textValue(value).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",
+  '"':"&quot;","'":"&#39;"
+ }[c]));
 }
 
-function showError(message){
- const container=document.getElementById("productList");
- container.innerHTML="";
+function makeCard(plan){
 
- const box=document.createElement("div");
- box.className="error";
- box.textContent="Unable to load hosting plans: "+message;
-
- container.appendChild(box);
-}
-
-function createPlanCard(plan){
-
- const card=document.createElement("div");
+ const card=document.createElement("article");
  card.className="product";
 
- const title=document.createElement("h3");
- title.textContent=safeText(plan.name);
+ const name=escapeHTML(plan.name);
+ const ram=escapeHTML(plan.ram);
+ const cpu=escapeHTML(plan.cpu);
+ const storage=escapeHTML(plan.storage);
+ const price=Number(plan.price);
+ const file=textValue(plan.file);
 
- const specs=document.createElement("div");
- specs.className="specs";
+ const safeFile=file && !file.startsWith("/") && !file.includes("..")
+  ? file : "#";
 
- specs.innerHTML=`
-  RAM: ${escapeHTML(plan.ram)}<br>
-  CPU: ${escapeHTML(plan.cpu)}<br>
-  Storage: ${escapeHTML(plan.storage)}
+ card.innerHTML=`
+  <div class="product-top">
+   <span class="plan-badge">HOSTING PLAN</span>
+   <span class="plan-icon">◈</span>
+  </div>
+
+  <h4>${name}</h4>
+
+  <div class="product-specs">
+   <div class="spec"><span>Memory / RAM</span><span>${ram}</span></div>
+   <div class="spec"><span>CPU Resources</span><span>${cpu}</span></div>
+   <div class="spec"><span>Storage</span><span>${storage}</span></div>
+  </div>
+
+  <div class="price">
+   ${Number.isFinite(price) ? "₹"+price.toLocaleString("en-IN") : "Contact Us"}
+   <small>/ month</small>
+  </div>
  `;
 
- const price=document.createElement("div");
- price.className="price";
-
- const amount=Number(plan.price);
-
- price.textContent=Number.isFinite(amount)
-  ? "₹"+amount.toLocaleString("en-IN")+" / Month"
-  : "Price unavailable";
-
  const link=document.createElement("a");
+ link.className="order-link";
+ link.href=safeFile;
+ link.textContent="VIEW PLAN DETAILS →";
 
- const file=safeText(plan.file);
-
- if(file && !file.startsWith("/") && !file.includes("..")){
-  link.href=file;
- }else{
-  link.href="#";
- }
-
- link.textContent="View Plan";
-
- card.append(title,specs,price,link);
-
+ card.appendChild(link);
  return card;
 }
 
@@ -282,20 +711,16 @@ async function loadProducts(){
 
  try{
 
-  const url=PRODUCT_FILE+"?v="+Date.now();
-
-  const response=await fetch(url,{
-   cache:"no-store"
-  });
+  const response=await fetch(
+   PRODUCT_FILE+"?v="+Date.now(),
+   {cache:"no-store"}
+  );
 
   if(!response.ok){
-   throw new Error(
-    "HTTP "+response.status+" - products.json not found"
-   );
+   throw new Error("HTTP "+response.status+" loading products.json");
   }
 
   const raw=await response.text();
-
   let categories;
 
   try{
@@ -305,61 +730,66 @@ async function loadProducts(){
   }
 
   if(!Array.isArray(categories)){
-   throw new Error("JSON must contain an array of categories.");
+   throw new Error("Products JSON must contain a category array.");
   }
 
   container.innerHTML="";
-
-  let totalPlans=0;
+  let total=0;
 
   categories.forEach(category=>{
 
-   if(!category || !Array.isArray(category.plans)){
-    return;
-   }
+   if(!category || !Array.isArray(category.plans)) return;
 
    const section=document.createElement("div");
    section.className="category";
 
-   const title=document.createElement("div");
-   title.className="category-title";
+   const heading=document.createElement("div");
+   heading.className="category-header";
 
-   const heading=document.createElement("h2");
-   heading.textContent=safeText(category.category);
+   const icon=document.createElement("div");
+   icon.className="category-icon";
+   icon.textContent="◈";
 
-   title.appendChild(heading);
-   section.appendChild(title);
+   const titleWrap=document.createElement("div");
+
+   const title=document.createElement("h3");
+   title.textContent=textValue(category.category);
+
+   const subtitle=document.createElement("small");
+   subtitle.textContent="Available hosting packages";
+
+   titleWrap.append(title,subtitle);
+   heading.append(icon,titleWrap);
 
    const grid=document.createElement("div");
    grid.className="products";
 
    category.plans.forEach(plan=>{
-
-    if(!plan || !plan.name){
-     return;
-    }
-
-    grid.appendChild(createPlanCard(plan));
-    totalPlans++;
-
+    if(!plan || !plan.name) return;
+    grid.appendChild(makeCard(plan));
+    total++;
    });
 
-   if(grid.children.length>0){
-    section.appendChild(grid);
+   if(grid.children.length){
+    section.append(heading,grid);
     container.appendChild(section);
    }
 
   });
 
-  if(totalPlans===0){
-   container.innerHTML='<div class="status">No hosting plans available.</div>';
+  if(total===0){
+   container.innerHTML='<div class="empty">No hosting plans are currently available.</div>';
   }
 
  }catch(error){
 
-  console.error("OGHOST PRODUCT ERROR:",error);
+  console.error("OGHOST ERROR:",error);
 
-  showError(error.message);
+  container.innerHTML="";
+  const message=document.createElement("div");
+  message.className="error";
+  message.textContent="Unable to load plans: "+error.message;
+  container.appendChild(message);
 
  }
 
